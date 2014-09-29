@@ -67,19 +67,43 @@ fn main(){
 					let x : Option<uint> = from_str(args[1]);
 					match x {
 						Some(x) =>{
-							if (x >= jobs.len()){println!("No command [{}]", x)}
+							if (x > jobs.len() || x <= 0){println!("No job [{}]", x)}
 							else{
 								jobs.get_mut(x-1).process.wait();
+								jobs.remove(x-1);
 							}; 
 							Ok(())
 						}
 						None => {println!("Not a valid number"); Ok(())}
 					}
 				} else if jobs.len() == 1 {
-					// Pull the only job to the foreground
+					jobs.get_mut(0).process.wait();
+					jobs.remove(0);
 					Ok(())
 				}else {
 					println!("No number specified for 'fg'"); Ok(())
+				}
+			}
+			"kill" => {
+				if args.len() > 1 {
+					let x : Option<uint> = from_str(args[1]);
+					match x {
+						Some(x) =>{
+							if (x > jobs.len() || x <= 0){println!("No job [{}]", x)}
+							else{
+								let _ = jobs.get_mut(x-1).process.signal_exit();
+								jobs.remove(x-1);
+							}; 
+							Ok(())
+						}
+						None => {println!("Not a valid number"); Ok(())}
+					}
+				} else if jobs.len() == 1 {
+					let _ = jobs.get_mut(0).process.signal_exit();
+					jobs.remove(0);
+					Ok(())
+				}else {
+					println!("No number specified for 'kill'"); Ok(())
 				}
 			}	
 			_ => { 

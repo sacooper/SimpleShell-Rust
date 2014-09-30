@@ -149,14 +149,13 @@ fn main(){
 
 	loop{
 		print!("COMMAND -> ");
-		let input : String = io::stdin().read_line().unwrap_or(String::new()).replace("\n", "");
-//		println!("Input: \"{}\"", input);
-		if input.is_empty() {break};
+		let input : String = io::stdin().read_line().unwrap_or(String::new());
+		// If they just entered a newline, continue, if its empty, means ^-D, so exit
+		if input.is_empty() {break}
+		else if input == String::from_str("\n"){continue};
+		let input : String = input.replace("\n", "");// Remove trailing newline
 		let (setup_res, background) = setup(&input);
-		// println!("args: {}\nBackground: {}\n", setup_res, background);
 		if execute(&setup_res, background, &mut history, &mut jobs).is_err(){break}
-
-		// println!("{}", exec_res);		
 	}
 
 	for x in jobs.iter(){

@@ -1,4 +1,3 @@
-extern crate debug;
 use std::io;
 use std::io::process::Command;
 use std::io::process;
@@ -29,8 +28,8 @@ fn main(){
 				} else{
 					let y : Vec<&HistoryEntry> = history.iter().rev().take(10u).collect();
 					for (i, x) in  y.iter().enumerate().rev(){
-						let name = x.args.iter().fold(String::new(), |acc, x|{acc.add(x).append(" ")});
-						let name = if x.background {name} else {name.append("&")};
+						let name = x.args.iter().fold(String::new(), |acc, x|{acc.add(x).add(&" ")});
+						let name = if x.background {name} else {name.add(&"&")};
 						println!("{}: {}", history.len() - i, name)
 					}
 				};
@@ -57,7 +56,7 @@ fn main(){
 			}
 			"jobs" => {
 				if jobs.is_empty(){println!("No jobs currently running")}
-				else{ 
+				else{
 					for (i, x) in jobs.iter().enumerate(){
 						println!("[{}] {}", i+1, x.name)}}
 				Ok(())
@@ -67,17 +66,17 @@ fn main(){
 					let x : Option<uint> = from_str(args[1]);
 					match x {
 						Some(x) =>{
-							if (x > jobs.len() || x <= 0){println!("No job [{}]", x)}
+							if x > jobs.len() || x <= 0 {println!("No job [{}]", x)}
 							else{
-								jobs.get_mut(x-1).process.wait();
+								let _ = jobs[x-1].process.wait();
 								jobs.remove(x-1);
-							}; 
+							};
 							Ok(())
 						}
 						None => {println!("Not a valid number"); Ok(())}
 					}
 				} else if jobs.len() == 1 {
-					jobs.get_mut(0).process.wait();
+					let _ = jobs[0].process.wait();
 					jobs.remove(0);
 					Ok(())
 				}else {
@@ -89,24 +88,24 @@ fn main(){
 					let x : Option<uint> = from_str(args[1]);
 					match x {
 						Some(x) =>{
-							if (x > jobs.len() || x <= 0){println!("No job [{}]", x)}
+							if x > jobs.len() || x <= 0{println!("No job [{}]", x)}
 							else{
-								let _ = jobs.get_mut(x-1).process.signal_exit();
+								let _ = jobs[x-1].process.signal_exit();
 								jobs.remove(x-1);
-							}; 
+							};
 							Ok(())
 						}
 						None => {println!("Not a valid number"); Ok(())}
 					}
 				} else if jobs.len() == 1 {
-					let _ = jobs.get_mut(0).process.signal_exit();
+					let _ = jobs[0].process.signal_exit();
 					jobs.remove(0);
 					Ok(())
 				}else {
 					println!("No number specified for 'kill'"); Ok(())
 				}
-			}	
-			_ => { 
+			}
+			_ => {
 				let mut prog = Command::new(args[0]);
 				prog.args(args.tail().as_slice());
 				prog.stdin(process::InheritFd(0));
@@ -121,16 +120,16 @@ fn main(){
 							Ok(p) => tx.send(p),
 							Err(e) => println!("Invalid command: {}", e.kind)}});
 					let p = rx.recv();
-					jobs.push(JobEntry{process : p, name : args.iter().fold(String::new(), |acc, x|{acc.append(*x).append(" ")})})}
+					jobs.push(JobEntry{process : p, name : args.iter().fold(String::new(), |acc, x|{acc.add(x).add(&" ")})})}
 				else {
 					match prog.spawn(){
-						Ok(p) => (),
+						Ok(_) => (),
 						Err(e) => println!("Invalid command: {}", e.kind)
 					}}
 
 				history.push(HistoryEntry{args : args.iter().map(|x|{String::from_str(*x)}).collect(), background : background});
 
-				
+
 				Ok(())
 			}
 		}
@@ -144,7 +143,7 @@ fn main(){
 			"&" => {background = true},
 			_ => ret.push(c)}}
 		(ret, background)}
-	
+
 
 
 	loop{
